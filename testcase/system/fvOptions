@@ -1,0 +1,38 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  3.0.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+sensor_1
+{
+    type            localVelocityForce;
+    active          on;
+
+    localVelocityForceCoeffs
+    {
+    selectionMode   cellSet; 				// Apply force to all cells
+	cellSet		sensor_1;
+	fields          (U);                    // Name of velocity field
+	freestream		(0.25 0 0);
+    Ubar            (1e-9 0 0);             // Desired mean velocity
+    relaxation      0.9;                    // Optional relaxation factor
+	position		(0 0 0);				// Position of root!
+	gaussFactor		5.0;
+	gaussType		"Gauss1";
+	diameter		0.02;
+	height			0.2;
+    }
+}
+// ************************************************************************* //

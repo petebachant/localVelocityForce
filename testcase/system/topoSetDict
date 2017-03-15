@@ -1,0 +1,76 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  3.0.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    {
+        name 	sensor_1;
+        type	cellSet;
+        action	new;
+        source	cylinderToCell;
+        sourceInfo
+        {
+            type cylinder;
+            p1 (0 0   0 );
+            p2 (0 0 0.2 );
+            radius 0.015;
+        }
+    }
+
+
+    {
+        name    sensor_1_cellZone;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set sensor_1;
+        }
+    }
+
+    // Get all faces in cellSet
+    {
+        name    sensor_1_faceSet;
+        type    faceSet;
+        action  new;
+        source  cellToFace;
+        sourceInfo
+        {
+            set     sensor_1;
+            option  all;
+        }
+    }
+
+    // Get all faces in cellSet
+    {
+        name    sensor_1_faceZone;
+        type    faceZoneSet;
+        action  new;
+        source  setToFaceZone;
+        sourceInfo
+        {
+            faceSet     sensor_1_faceSet;
+            option  all;
+        }
+    }
+
+
+
+);
+
+// ************************************************************************* //
