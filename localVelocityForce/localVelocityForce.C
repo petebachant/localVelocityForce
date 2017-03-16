@@ -69,14 +69,8 @@ void Foam::fv::localVelocityForce::writePropslocal
         );
         propsDict.add("gradient", gradPlocal_);
         propsDict.regIOobject::write();
-        
-      
-     }
-        
+     }        
 }
-
-
-
 
 
 void Foam::fv::localVelocityForce::writeProps
@@ -100,15 +94,12 @@ void Foam::fv::localVelocityForce::writeProps
         );
         propsDict.add("gradient", gradP);
         propsDict.regIOobject::write();
-        
-      
-     }
-        
+     }        
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
 
 Foam::fv::localVelocityForce::localVelocityForce
 (
@@ -199,51 +190,43 @@ Foam::scalar Foam::fv::localVelocityForce::magUbarAve
         magUbarAve += (flowDir_ & U[cellI])*volCell;
     }
 
-    reduce(magUbarAve, sumOp<scalar>());
+    // reduce(magUbarAve, sumOp<scalar>());
 
-    magUbarAve /= V_;
-    
+    magUbarAve /= V_;    
 
     return magUbarAve;
 }
+
 
 Foam::scalarField Foam::fv::localVelocityForce::magUbarlocal
 (
     const volVectorField& U
 ) const
 {
-    scalarField magUbarlocal_(cells_.size(),0.0);
+    scalarField magUbarlocal_(cells_.size(), 0.0);
 
     const scalarField& cv = mesh_.V();
     forAll(cells_, i)
     {
-		label cellI = cells_[i];
+        label cellI = cells_[i];
         magUbarlocal_[i] = (flowDir_ & U[cellI]);
     }
 
-    reduce(magUbarlocal_, sumOp<scalarField>());
-   
-
+    // reduce(magUbarlocal_, sumOp<scalarField>());
 
     return magUbarlocal_;
 }
 
 
-
 void Foam::fv::localVelocityForce::correct(volVectorField& U)
 {
-    const scalarField& rAU = rAPtr_().internalField(); //1.0/UEqn.A() Diagonal part of matrix U [s/m]
-  
-
-
- 
-
+    const scalarField& rAU = rAPtr_().internalField(); 
+    //1.0/UEqn.A() Diagonal part of matrix U [s/m]
 
     // Integrate flow variables over cell set
     scalar rAUave = 0.0;
 
     const scalarField& cv = mesh_.V();
-
     
     forAll(cells_, i)
     {
@@ -253,58 +236,47 @@ void Foam::fv::localVelocityForce::correct(volVectorField& U)
     }
 
     // Collect across all processors
-    reduce(rAUave, sumOp<scalar>());
+    // reduce(rAUave, sumOp<scalar>());
 
     // Volume averages
     rAUave /= V_;
     
-    
-    
-	// Integrate flow variables over cell set
-	scalarField rAUlocal_(cells_.size(),0.0);//_(cells_.size(),0);
+    // Integrate flow variables over cell set
+    scalarField rAUlocal_(cells_.size(), 0.0);
+    //_(cells_.size(),0);
 
     forAll(cells_, i)
     {
-
         label cellI = cells_[i];
         rAUlocal_[i] = rAU[cellI];
     }
 
     // Collect across all processors
-    reduce(rAUlocal_, sumOp<scalarField>());
+    // reduce(rAUlocal_, sumOp<scalarField>());
 
  
     scalar magUbarAve = this->magUbarAve(U);   
-	scalarField magUbarlocal_ = this->magUbarlocal(U);  
-	 
-
+    scalarField magUbarlocal_ = this->magUbarlocal(U);  
 
     // Calculate the pressure gradient increment needed to adjust the average
     // flow-rate to the desired value
 
     dGradP_ = relaxation_*(mag(Ubar_) - magUbarAve)/rAUave;   
-	dGradPlocal_ = relaxation_*(mag(Ubar_) - magUbarlocal_)/(1e-12+rAUlocal_);
-
+    dGradPlocal_ = relaxation_*(mag(Ubar_) - magUbarlocal_)/(1e-12+rAUlocal_);
 
     // Apply correction to velocity field          
     forAll(cells_, i)
     {
         label cellI = cells_[i];
         //U[cellI] += flowDir_*rAU[cellI]*dGradP_;
-		U[cellI] =  flowDir_ * rAU[cellI] * dGradPlocal_[cellI];
+        U[cellI] =  flowDir_ * rAU[cellI] * dGradPlocal_[cellI];
     }
 
 	scalar gradP = gradP0_ + dGradP_; 
 	scalarField gradPlocal_ = gradP0_+ dGradPlocal_; 
-
-    
 	vectorField ibSource_(cells_.size(),vector::zero);
 	ibSource_ = (flowDir_*gradPlocal_);
-	
 
-	
-    
-	
     Info<< "Pressure gradient source: uncorrected Ubar = " << magUbarAve
         << ", pressure gradient = " << gradP << endl;
         
@@ -312,19 +284,13 @@ void Foam::fv::localVelocityForce::correct(volVectorField& U)
         //<< ", pressure gradient local = " << dGradPlocal_ << endl;
 
     writePropslocal(gradPlocal_);
-    
-
-
-
 	
-	if (debug==2)
+    if (debug == 2)
     {
-		//Info << "dGradP_ :" << dGradP_ << endl;
-		//Info << "dGradPlocal_ :" << dGradPlocal_ << endl;
-		Info << "ibSource_ :" << ibSource_ << endl;
-	}   
-
-	
+        //Info << "dGradP_ :" << dGradP_ << endl;
+        //Info << "dGradPlocal_ :" << dGradPlocal_ << endl;
+        Info << "ibSource_ :" << ibSource_ << endl;
+    }   	
 }
 
 
@@ -335,10 +301,7 @@ void Foam::fv::localVelocityForce::addSup
     const label fieldI
 )
 {   
-       
-	
-	
-	DimensionedField<vector, volMesh> Su
+    DimensionedField<vector, volMesh> Su
     (
         IOobject
         (
@@ -351,14 +314,10 @@ void Foam::fv::localVelocityForce::addSup
         mesh_,
         dimensionedVector("zero", eqn.dimensions()/dimVolume, vector::zero)
     );
- 
 
-	UIndirectList<vector>(Su,cells_) = ibSource_;
+    UIndirectList<vector>(Su,cells_) = ibSource_;
 
     eqn += Su;
-    
-
-
 }
 
 
