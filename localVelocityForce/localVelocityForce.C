@@ -221,10 +221,6 @@ Foam::scalarField Foam::fv::localVelocityForce::magUbarlocal
         magUbarlocal_[i] = (flowDir_ & U[cellI]);
     }
 
-    reduce(magUbarlocal_, sumOp<scalarField>());
-   
-
-
     return magUbarlocal_;
 }
 
@@ -233,11 +229,7 @@ Foam::scalarField Foam::fv::localVelocityForce::magUbarlocal
 void Foam::fv::localVelocityForce::correct(volVectorField& U)
 {
     const scalarField& rAU = rAPtr_().internalField(); //1.0/UEqn.A() Diagonal part of matrix U [s/m]
-  
-
-
- 
-
+   
 
     // Integrate flow variables over cell set
     scalar rAUave = 0.0;
@@ -270,11 +262,8 @@ void Foam::fv::localVelocityForce::correct(volVectorField& U)
         rAUlocal_[i] = rAU[cellI];
     }
 
-    // Collect across all processors
-    reduce(rAUlocal_, sumOp<scalarField>());
-
  
-    scalar magUbarAve = this->magUbarAve(U);   
+	scalar magUbarAve = this->magUbarAve(U);   
 	scalarField magUbarlocal_ = this->magUbarlocal(U);  
 	 
 
@@ -290,8 +279,7 @@ void Foam::fv::localVelocityForce::correct(volVectorField& U)
     forAll(cells_, i)
     {
         label cellI = cells_[i];
-        //U[cellI] += flowDir_*rAU[cellI]*dGradP_;
-		U[cellI] =  flowDir_ * rAU[cellI] * dGradPlocal_[cellI];
+	U[cellI] =  flowDir_ * rAU[cellI] * dGradPlocal_[cellI];
     }
 
 	scalar gradP = gradP0_ + dGradP_; 
