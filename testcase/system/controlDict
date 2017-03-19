@@ -50,7 +50,7 @@ maxCo           0.9;
 
 libs
 (
-    "libsensorFoam.so"
+    "libpseudoIBMFoam.so"
 );
 
 

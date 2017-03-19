@@ -4,4 +4,4 @@ cellSetOption/cellSetOptionIO.C
 localVelocityForce.C
 localVelocityForceIO.C
 
-LIB = $(FOAM_USER_LIBBIN)/libsensorFoam
+LIB = $(FOAM_USER_LIBBIN)/libpseudoIBMFoam
