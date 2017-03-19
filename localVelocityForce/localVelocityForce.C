@@ -232,7 +232,7 @@ void Foam::fv::localVelocityForce::correct(volVectorField& U)
     }
 
     // Collect across all processors
-    // reduce(rAUave, sumOp<scalar>());
+    reduce(rAUave, sumOp<scalar>());
 
     // Volume averages
     rAUave /= V_;
